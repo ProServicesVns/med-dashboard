@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complete Indian Medicine Dashboard - PRO SERVICES</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #1a1a2e; overflow-x: hidden; }
+.header { background: linear-gradient(135deg, #1a5276, #2e86c1); color: #fff; padding: 20px 30px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+.header h1 { font-size: 20px; font-weight: 600; }
+.header h1 span { font-weight: 300; opacity: 0.8; }
+.header h1 small { display: block; font-size: 10px; font-weight: 300; opacity: 0.6; margin-top: 2px; letter-spacing: 1px; }
+.header-actions { display: flex; align-items: center; gap: 15px; }
+.status-badge { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; background: rgba(255,255,255,0.15); }
+.status-badge.online { background: rgba(39,174,96,0.25); }
+.status-badge.offline { background: rgba(231,76,60,0.25); }
+.stats { display: flex; gap: 20px; padding: 20px 30px; flex-wrap: wrap; }
+.stat-card { background: #fff; border-radius: 12px; padding: 18px 24px; flex: 1; min-width: 180px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.stat-card .label { font-size: 12px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-card .value { font-size: 26px; font-weight: 700; color: #1a5276; margin-top: 4px; }
+.stat-card .sub { font-size: 12px; color: #27ae60; margin-top: 2px; }
+.main { display: flex; gap: 20px; padding: 0 30px 30px; }
+.left-panel { flex: 1; background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden; display: flex; flex-direction: column; max-height: calc(100vh - 220px); }
+.right-panel { width: 480px; background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow-y: auto; max-height: calc(100vh - 220px); padding: 0; }
+.search-bar { display: flex; padding: 15px; border-bottom: 1px solid #eee; gap: 10px; align-items: center; position: relative; }
+.search-bar input { flex: 1; padding: 10px 16px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; }
+.search-bar input:focus { border-color: #2e86c1; box-shadow: 0 0 0 3px rgba(46,134,193,0.15); }
+.search-bar select { padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; background: #fff; }
+.search-bar .count-badge { font-size: 13px; color: #7f8c8d; white-space: nowrap; }
+.filter-btn { padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; background: #fff; cursor: pointer; white-space: nowrap; user-select: none; }
+.filter-btn:hover { border-color: #2e86c1; }
+.filter-btn.active { background: #ebf5fb; border-color: #2e86c1; color: #2e86c1; }
+.filter-dropdown { display: none; position: absolute; top: 100%; right: 70px; background: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); padding: 8px 0; z-index: 100; min-width: 200px; }
+.filter-dropdown.open { display: block; }
+.filter-dropdown label { display: flex; align-items: center; gap: 8px; padding: 7px 14px; font-size: 13px; cursor: pointer; transition: 0.1s; }
+.filter-dropdown label:hover { background: #f0f7ff; }
+.filter-dropdown input[type="checkbox"] { accent-color: #2e86c1; }
+.list-container { flex: 1; overflow-y: auto; }
+.medicine-item { padding: 12px 15px; border-bottom: 1px solid #f5f5f5; cursor: pointer; transition: 0.15s; }
+.medicine-item:hover { background: #f0f7ff; }
+.medicine-item.active { background: #e3f0fa; border-left: 3px solid #2e86c1; }
+.medicine-item .name { font-size: 14px; font-weight: 500; color: #1a1a2e; }
+.medicine-item .meta { font-size: 12px; color: #7f8c8d; margin-top: 3px; display: flex; gap: 12px; flex-wrap: wrap; }
+.medicine-item .meta span { display: inline-flex; align-items: center; gap: 3px; }
+.medicine-item .savings { font-size: 11px; font-weight: 600; color: #27ae60; background: #eafaf1; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+.form-view { padding: 0; }
+.form-header { background: linear-gradient(135deg, #1a5276, #2e86c1); color: #fff; padding: 20px 24px; }
+.form-header h2 { font-size: 18px; font-weight: 600; }
+.form-header .subtitle { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+.form-body { padding: 16px 24px 24px; }
+.form-section { margin-bottom: 18px; }
+.form-section h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #95a5a6; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #f0f0f0; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-field .field-label { font-size: 11px; color: #7f8c8d; margin-bottom: 2px; }
+.form-field .field-value { font-size: 14px; font-weight: 500; color: #1a1a2e; word-break: break-word; }
+.form-field.full { grid-column: 1 / -1; }
+.box { border-radius: 8px; padding: 12px 16px; margin-top: 10px; }
+.ja-box { background: #eafaf1; border: 1px solid #a9dfbf; }
+.ja-box h4 { font-size: 12px; color: #27ae60; margin-bottom: 4px; }
+.ja-box p { font-size: 13px; }
+.ja-box .ja-mrp { font-size: 18px; font-weight: 700; color: #1e8449; }
+.sub-box { background: #fef9e7; border: 1px solid #f9e79f; }
+.sub-box h4 { font-size: 12px; color: #b7950b; margin-bottom: 6px; }
+.sub-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #fdf2e9; font-size: 13px; }
+.sub-item:last-child { border-bottom: none; }
+.sub-item .sub-name { flex: 1; color: #1a1a2e; }
+.sub-item .sub-price { font-weight: 600; color: #1e8449; font-size: 13px; margin-left: 8px; white-space: nowrap; }
+.sub-item .sub-savings { font-size: 11px; color: #27ae60; margin-left: 6px; }
+.placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #bdc3c7; padding: 40px; text-align: center; }
+.placeholder .icon { font-size: 48px; margin-bottom: 12px; }
+.placeholder p { font-size: 14px; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+.tag-available { background: #eafaf1; color: #27ae60; }
+.tag-unavailable { background: #fdedec; color: #e74c3c; }
+.tag-type { background: #ebf5fb; color: #2980b9; }
+.tag-side-effect { background: #fdedec; color: #e74c3c; margin: 2px; }
+.tag-cat { background: #fef9e7; color: #b7950b; }
+.img-section { margin-bottom: 18px; }
+.img-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.img-grid a { display: block; border-radius: 8px; overflow: hidden; border: 1px solid #eee; text-decoration: none; transition: 0.2s; }
+.img-grid a:hover { border-color: #2e86c1; box-shadow: 0 2px 8px rgba(46,134,193,0.2); }
+.img-grid img { width: 100%; height: 120px; object-fit: cover; display: block; }
+.img-grid .img-label { font-size: 10px; color: #7f8c8d; text-align: center; padding: 4px; }
+.image-link-btn { display: inline-flex; align-items: center; gap: 6px; background: #ebf5fb; color: #2980b9; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500; transition: 0.2s; }
+.image-link-btn:hover { background: #d4e6f1; }
+.loading { text-align: center; padding: 40px; color: #7f8c8d; }
+.loading .spinner { border: 3px solid #eee; border-top: 3px solid #2e86c1; border-radius: 50%; width: 30px; height: 30px; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.footer { background: #1a5276; color: rgba(255,255,255,0.6); text-align: center; padding: 12px 30px; font-size: 12px; margin-top: 0; }
+.footer strong { color: #fff; }
+.footer a { color: #85c1e9; text-decoration: none; }
+.pro-badge { display: inline-block; background: #f39c12; color: #fff; padding: 1px 8px; border-radius: 3px; font-size: 9px; font-weight: 700; letter-spacing: 0.5px; vertical-align: middle; margin-left: 6px; }
+@media (max-width: 900px) {
+  .main { flex-direction: column; }
+  .right-panel { width: 100%; max-height: none; }
+  .left-panel { max-height: 50vh; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Complete Indian Medicine <span>Dashboard</span><small>BY PRO SERVICES</small></h1>
+  <div class="header-actions">
+    <span class="status-badge offline" id="statusBadge">Connecting...</span>
+  </div>
+</div>
+
+<div class="stats" id="stats">
+  <div class="stat-card"><div class="label">Total Medicines</div><div class="value" id="statTotal">-</div></div>
+  <div class="stat-card"><div class="label">With JA Alternative</div><div class="value" id="statJA">-</div><div class="sub" id="statJAPct"></div></div>
+  <div class="stat-card"><div class="label">Available</div><div class="value" id="statAvail">-</div></div>
+  <div class="stat-card"><div class="label">Avg Savings vs Brand</div><div class="value" id="statSavings">-</div></div>
+</div>
+
+<div class="main">
+  <div class="left-panel">
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search 270K+ Indian medicines..." autocomplete="off">
+      <div class="filter-btn" id="filterBtn" onclick="toggleFilter()">☰ Search in ▾</div>
+      <div class="filter-dropdown" id="filterDropdown">
+        <label><input type="checkbox" data-field="name" checked onchange="onFilterChange()"> Medicine Name</label>
+        <label><input type="checkbox" data-field="comp1" checked onchange="onFilterChange()"> Composition</label>
+        <label><input type="checkbox" data-field="manufacturer" onchange="onFilterChange()"> Manufacturer</label>
+        <label><input type="checkbox" data-field="therapeutic" onchange="onFilterChange()"> Therapeutic Class</label>
+        <label><input type="checkbox" data-field="usage" onchange="onFilterChange()"> Usage / Indication</label>
+        <label><input type="checkbox" data-field="substitutes" onchange="onFilterChange()"> Substitutes</label>
+        <label><input type="checkbox" data-field="schedule" onchange="onFilterChange()"> Schedule</label>
+        <label><input type="checkbox" data-field="dosage" onchange="onFilterChange()"> Dosage Form</label>
+        <label><input type="checkbox" data-field="chemicalClass" onchange="onFilterChange()"> Chemical Class</label>
+        <label><input type="checkbox" data-field="hsn" onchange="onFilterChange()"> HSN Code</label>
+        <label><input type="checkbox" data-field="gst" onchange="onFilterChange()"> GST %</label>
+        <label><input type="checkbox" data-field="marketYear" onchange="onFilterChange()"> Market Year</label>
+        <label><input type="checkbox" data-field="majorCat" onchange="onFilterChange()"> Major Category</label>
+        <label><input type="checkbox" data-field="alcohol" onchange="onFilterChange()"> Alcohol Interaction</label>
+        <label><input type="checkbox" data-field="driving" onchange="onFilterChange()"> Driving Warning</label>
+      </div>
+      <div class="count-badge" id="resultCount">0</div>
+    </div>
+    <div class="list-container" id="listContainer">
+      <div class="placeholder"><div class="icon">🔌</div><p>Connecting to Medicine Database...</p></div>
+    </div>
+  </div>
+  <div class="right-panel" id="formPanel">
+    <div class="placeholder"><div class="icon">🔍</div><p>Select a medicine to view full details</p></div>
+  </div>
+</div>
+
+<div class="footer">
+  <strong>Complete Indian Medicine Dashboard</strong> &mdash; Developed by <strong>PRO SERVICES</strong>
+  &nbsp;|&nbsp; Data powered by 1mg &amp; Jan Aushadhi
+  &nbsp;|&nbsp; For API access or custom development, contact <a href="#">proservices@example.com</a>
+  <span class="pro-badge">PRO</span>
+</div>
+
+<script>
+const API = {
+  baseUrl: localStorage.getItem('apiUrl') || 'https://med-man.onrender.com',
+  key: localStorage.getItem('apiKey') || 'med-pro-services-2026'
+};
+
+let filteredData = [];
+
+function setStatus(text, online) {
+  const el = document.getElementById('statusBadge');
+  el.textContent = text;
+  el.className = 'status-badge ' + (online ? 'online' : 'offline');
+}
+
+async function apiFetch(path) {
+  const url = API.baseUrl + path + (path.indexOf('?') > -1 ? '&' : '?') + 'key=' + encodeURIComponent(API.key);
+  const res = await fetch(url);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'HTTP ' + res.status);
+  }
+  return res.json();
+}
+
+async function initConnection() {
+  try {
+    const data = await apiFetch('/api/health');
+    setStatus('Online \u2705', true);
+    document.getElementById('statTotal').textContent = (data.records || 0).toLocaleString();
+    document.getElementById('listContainer').innerHTML = '<div class="placeholder"><div class="icon">\uD83D\uDD0D</div><p>Type a medicine name to start searching</p></div>';
+  } catch (e) {
+    setStatus('Offline \u274C', false);
+    document.getElementById('listContainer').innerHTML = '<div class="placeholder"><div class="icon">\u274C</div><p>Could not connect to database</p><p style="font-size:12px;color:#95a5a6;margin-top:8px;">' + esc(e.message) + '</p></div>';
+  }
+}
+
+let searchTimer;
+document.getElementById('searchInput').addEventListener('keyup', function() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(applyFilter, 150);
+});
+document.getElementById('searchInput').addEventListener('search', applyFilter);
+
+function toggleFilter() {
+  document.getElementById('filterDropdown').classList.toggle('open');
+  document.getElementById('filterBtn').classList.toggle('active');
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.search-bar')) {
+    document.getElementById('filterDropdown').classList.remove('open');
+    document.getElementById('filterBtn').classList.remove('active');
+  }
+});
+function onFilterChange() {
+  applyFilter();
+}
+
+function getSearchFields() {
+  var checks = document.querySelectorAll('#filterDropdown input[type="checkbox"]:checked');
+  var fields = [];
+  for (var i = 0; i < checks.length; i++) {
+    fields.push(checks[i].getAttribute('data-field'));
+  }
+  return fields;
+}
+
+async function applyFilter() {
+  const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+  if (!q) {
+    filteredData = [];
+    document.getElementById('resultCount').textContent = '0';
+    document.getElementById('listContainer').innerHTML = '<div class="placeholder"><div class="icon">\uD83D\uDD0D</div><p>Type a medicine name to start searching</p></div>';
+    document.getElementById('formPanel').innerHTML = '<div class="placeholder"><div class="icon">\uD83D\uDD0D</div><p>Select a medicine to view full details</p></div>';
+    return;
+  }
+  var searchIn = getSearchFields();
+  if (!searchIn.length) {
+    filteredData = [];
+    document.getElementById('resultCount').textContent = '0 (no fields)';
+    renderList();
+    return;
+  }
+  document.getElementById('listContainer').innerHTML = '<div class="loading"><div class="spinner"></div><p>Searching...</p></div>';
+  try {
+    const data = await apiFetch('/api/search?q=' + encodeURIComponent(q) + '&fields=' + searchIn.join(',') + '&limit=200');
+    filteredData = data.results || [];
+    document.getElementById('resultCount').textContent = data.total + ' results' + (data.time ? ' (' + data.time + ')' : '');
+    renderList();
+  } catch (e) {
+    document.getElementById('listContainer').innerHTML = '<div class="placeholder"><div class="icon">\u274C</div><p>Search failed</p><p style="font-size:12px;color:#95a5a6;margin-top:8px;">' + esc(e.message) + '</p></div>';
+  }
+}
+
+function renderList() {
+  const c = document.getElementById('listContainer');
+  if (!filteredData.length) {
+    c.innerHTML = '<div class="placeholder"><div class="icon">\uD83D\uDD0D</div><p>No medicines matching your search</p></div>';
+    document.getElementById('formPanel').innerHTML = '<div class="placeholder"><div class="icon">\uD83D\uDD0D</div><p>Select a medicine to view full details</p></div>';
+    return;
+  }
+  const show = filteredData.slice(0, 200);
+  var html = '';
+  for (var i = 0; i < show.length; i++) {
+    var d = show[i];
+    var st = d.jaSavings ? '<span class="savings">' + esc(d.jaSavings) + '</span>' : '';
+    var at = (d.available === 'Yes' || d.available === 'Y') ? '<span class="tag tag-available">Avail</span>' : '<span class="tag tag-unavailable">No</span>';
+    var hg = '<span>HSN: ' + (esc(d.hsn) || '-') + ' | GST: ' + (esc(d.gst) || '-') + '%</span>';
+    var sched = d.schedule ? '<span class="tag tag-type">' + esc(d.schedule) + '</span>' : '';
+    var therTag = d.therapeutic ? '<span class="tag tag-type">' + esc(d.therapeutic) + '</span>' : '';
+    var catTag = d.majorCat ? '<span class="tag tag-cat">' + esc(d.majorCat) + '</span>' : '';
+    html += '<div class="medicine-item" data-idx="' + i + '">' +
+      '<div class="name">' + esc(d.name) + sched + catTag + '</div>' +
+      '<div class="meta"><span>' + (esc(d.manufacturer) || '-') + '</span><span>\u20B9' + esc(d.mrp) + '</span>' + at + therTag + hg + '</div>' +
+      st + '</div>';
+  }
+  if (filteredData.length > 200) {
+    html += '<div style="padding:12px;text-align:center;font-size:12px;color:#7f8c8d;">Showing 200 of ' + filteredData.length + '. Refine search for specific results.</div>';
+  }
+  c.innerHTML = html;
+  var items = c.querySelectorAll('.medicine-item');
+  for (var j = 0; j < items.length; j++) {
+    (function(idx) {
+      items[j].addEventListener('click', function() {
+        showDetail(filteredData[idx]);
+      });
+    })(j);
+  }
+  if (filteredData.length) showDetail(filteredData[0]);
+}
+
+function showDetail(d) {
+  document.querySelectorAll('.medicine-item').forEach(function(el) { el.classList.remove('active'); });
+  var idx = filteredData.indexOf(d);
+  if (idx > -1) {
+    var el = document.querySelector('.medicine-item[data-idx="' + idx + '"]');
+    if (el) el.classList.add('active');
+  }
+
+  var at = (d.available === 'Yes' || d.available === 'Y') ? '<span class="tag tag-available">Available</span>' : '<span class="tag tag-unavailable">Unavailable</span>';
+  var imgUrl = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(d.name) + '+medicine+tablet';
+
+  var subsHtml = '';
+  if (d.subsWithPrices && d.subsWithPrices.length) {
+    subsHtml = d.subsWithPrices.map(function(item) {
+      var pStr = item.mrp ? '\u20B9' + item.mrp : '';
+      var mfrStr = item.mfr ? ' <span style="font-size:11px;color:#95a5a6;">' + esc(item.mfr) + '</span>' : '';
+      var sav = '';
+      if (item.mrp && d.mrp) {
+        var diff = parseFloat(d.mrp) - parseFloat(item.mrp);
+        if (diff > 0) sav = '<span class="sub-savings">save \u20B9' + diff.toFixed(0) + '</span>';
+      }
+      return '<div class="sub-item"><span class="sub-name">\u2022 ' + esc(item.name) + mfrStr + '</span>' + (pStr ? '<span class="sub-price">' + pStr + '</span>' : '') + sav + '</div>';
+    }).join('');
+    subsHtml = '<div class="box sub-box"><h4>\uD83D\uDC8A Substitutes & Their Prices</h4>' + subsHtml + '</div>';
+  } else if (d.substitutes) {
+    var subs = d.substitutes.split(', ').filter(function(s) { return s.trim(); });
+    subsHtml = subs.map(function(s) {
+      return '<div class="sub-item"><span class="sub-name">\u2022 ' + esc(s) + '</span></div>';
+    }).join('');
+    subsHtml = '<div class="box sub-box"><h4>\uD83D\uDC8A Substitutes</h4>' + subsHtml + '</div>';
+  }
+
+  var seHtml = '';
+  if (d.sideEffects) {
+    seHtml = d.sideEffects.split(', ').filter(function(s) { return s; }).map(function(s) { return '<span class="tag tag-side-effect">' + esc(s) + '</span>'; }).join('');
+  }
+
+  var jaBlock = d.jaAlt ? function(){
+    var raw = d.jaAlt;
+    var formMatch = raw.match(/(Suspension|Syrup|Tablet|Drops?|Capsule|Injection|Lotion|Cream|Gel|Ointment|Inhaler|Spray|Powder)/i);
+    var form = formMatch ? formMatch[0] : '';
+    var cleanName = raw;
+    if (form) cleanName = raw.substring(0, formMatch.index).trim();
+    cleanName = cleanName.replace(/\([^)]*\)/g,'').replace(/per\s*\d+\s*ml.*/gi,'').replace(/,\s*$/, '').trim();
+    var parts = cleanName.split(',').map(function(s){return s.trim();}).filter(function(s){return s;});
+    var ingredients = [];
+    for (var pi = 0; pi < parts.length; pi++) {
+      var sub = parts[pi].split(/\s+and\s+/i);
+      for (var si = 0; si < sub.length; si++) {
+        var item = sub[si].trim();
+        if (item) ingredients.push(item);
+      }
+    }
+    var labels = form ? '<span class="tag tag-type">' + form.charAt(0).toUpperCase() + form.slice(1) + '</span>' : '';
+    var listHtml = '<ul style="margin:8px 0;padding-left:18px;font-size:13px;line-height:1.6;">';
+    for (var ii = 0; ii < ingredients.length; ii++) {
+      listHtml += '<li>' + esc(ingredients[ii]) + '</li>';
+    }
+    listHtml += '</ul>';
+    var mrpHtml = d.jaMRP ? '<div class="ja-mrp">\u20B9' + esc(d.jaMRP) + '</div>' : '';
+    var savHtml = d.jaSavings ? '<p style="font-size:12px;color:#27ae60;margin-top:4px;">Savings: ' + esc(d.jaSavings) + '</p>' : '';
+    return '<div class="box ja-box"><h4>\uD83C\uDFE5 Jan Aushadhi Alternative ' + labels + '</h4>' + listHtml + mrpHtml + savHtml + '</div>';
+  }() : '';
+
+  var panel = document.getElementById('formPanel');
+  panel.innerHTML = '<div class="form-header"><h2>' + esc(d.name) + '</h2><div class="subtitle">' + esc(d.manufacturer) + ' ' + at + (d.schedule ? '<span class="tag tag-type">' + esc(d.schedule) + '</span>' : '') + ' ' + (d.dosage ? esc(d.dosage) : '') + (d.strength ? ' \u00B7 ' + esc(d.strength) : '') + (d.majorCat ? '<span style="background:rgba(255,255,255,0.15);padding:2px 8px;border-radius:4px;font-size:11px;">' + esc(d.majorCat) + '</span>' : '') + (d.marketYear ? '<span style="background:rgba(255,255,255,0.15);padding:2px 8px;border-radius:4px;font-size:11px;">Since ' + esc(d.marketYear) + '</span>' : '') + '</div></div><div class="form-body">' +
+    '<div class="form-section"><h3>\uD83D\uDCF8 Images</h3>' + function(){if(!d.imageUrl)return '';var url=cleanImageUrl(d.imageUrl);var zoom=url.indexOf('onemg.gumlet.io')>-1?'transform:scale(1.25);transform-origin:center;':'';var wrapStyle=zoom?'overflow:hidden;display:flex;align-items:center;justify-content:center;':'text-align:center;';return '<div style="margin-bottom:10px;'+wrapStyle+'"><img src="'+url+'" style="max-width:100%;max-height:200px;border-radius:8px;object-fit:contain;'+zoom+'" onerror="this.style.display=\'none\'"></div>';}() + '<div style="display:flex;gap:8px;flex-wrap:wrap;"><a class="image-link-btn" href="' + esc(imgUrl) + '" target="_blank" rel="noopener">\uD83D\uDD0D Google Images</a><a class="image-link-btn" href="https://www.google.com/search?tbm=isch&q=' + esc(encodeURIComponent(d.comp1 || d.name)) + '" target="_blank" rel="noopener" style="background:#fef9e7;color:#b7950b;">\uD83D\uDD2C By Composition</a></div></div>' +
+    '<div class="form-section"><h3>\uD83D\uDCB0 Pricing & Availability</h3><div class="form-grid">' +
+      '<div class="form-field"><div class="field-label">MRP</div><div class="field-value">\u20B9' + esc(d.mrp) + '</div></div>' +
+      '<div class="form-field"><div class="field-label">Price per Unit</div><div class="field-value">' + (d.unitPrice ? '\u20B9' + esc(d.unitPrice) : '-') + '</div></div>' +
+      '<div class="form-field"><div class="field-label">Type</div><div class="field-value">' + (esc(d.type) || '-') + '</div></div>' +
+      '<div class="form-field"><div class="field-label">Pack Size</div><div class="field-value">' + (esc(d.pack) || '-') + '</div></div>' +
+      '<div class="form-field"><div class="field-label">Available</div><div class="field-value">' + (esc(d.available) || '-') + '</div></div>' +
+      '<div class="form-field"><div class="field-label">HSN Code</div><div class="field-value">' + (esc(d.hsn) || '-') + '</div></div>' +
+      '<div class="form-field"><div class="field-label">GST (%)</div><div class="field-value">' + (esc(d.gst) || '-') + (d.gst ? '%' : '') + '</div></div>' +
+    '</div></div>' +
+    '<div class="form-section"><h3>\uD83E\uDDEA Composition & Strength</h3><div class="form-grid">' +
+      '<div class="form-field"><div class="field-label">Dosage Form</div><div class="field-value">' + (esc(d.dosage) || '-') + '</div></div>' +
+      '<div class="form-field"><div class="field-label">Strength</div><div class="field-value">' + (esc(d.strength) || '-') + '</div></div>' +
+      '<div class="form-field full"><div class="field-label">Composition 1</div><div class="field-value">' + (esc(d.comp1) || '-') + '</div></div>' +
+      (d.comp2 ? '<div class="form-field full"><div class="field-label">Composition 2</div><div class="field-value">' + esc(d.comp2) + '</div></div>' : '') +
+    '</div></div>' +
+    '<div class="form-section"><h3>\uD83C\uDFF7\uFE0F Classification & Scheduling</h3><div class="form-grid">' +
+      '<div class="form-field"><div class="field-label">Schedule</div><div class="field-value">' + (esc(d.schedule) || '-') + '</div></div>' +
+      '<div class="form-field"><div class="field-label">Therapeutic Class</div><div class="field-value">' + (esc(d.therapeutic) || '-') + '</div></div>' +
+      '<div class="form-field"><div class="field-label">Chemical Class</div><div class="field-value">' + (esc(d.chemicalClass) || '-') + '</div></div>' +
+      '<div class="form-field"><div class="field-label">Action Class</div><div class="field-value">' + (esc(d.actionClass) || '-') + '</div></div>' +
+      '<div class="form-field"><div class="field-label">Habit Forming</div><div class="field-value">' + (esc(d.habitForming) || '-') + '</div></div>' +
+      '<div class="form-field"><div class="field-label">Pregnancy Category</div><div class="field-value">' + (esc(d.pregCategory) || '-') + '</div></div>' +
+      '<div class="form-field"><div class="field-label">Market Year</div><div class="field-value">' + (esc(d.marketYear) || '-') + '</div></div>' +
+      '<div class="form-field"><div class="field-label">Major Category</div><div class="field-value">' + (esc(d.majorCat) || '-') + '</div></div>' +
+      '<div class="form-field"><div class="field-label">Therapeutic Category</div><div class="field-value">' + (esc(d.therapeuticCat) || '-') + '</div></div>' +
+      '<div class="form-field full"><div class="field-label">Usage / Indication</div><div class="field-value">' + (esc(d.usage) || '-') + '</div></div>' +
+    '</div></div>' +
+    '<div class="form-section"><h3>\u26A0\uFE0F Clinical Safety</h3><div class="form-grid">' +
+      '<div class="form-field"><div class="field-label">Alcohol Interaction</div><div class="field-value">' + (esc(d.alcohol) || '-') + '</div></div>' +
+      '<div class="form-field"><div class="field-label">Driving Warning</div><div class="field-value">' + (esc(d.driving) || '-') + '</div></div>' +
+    '</div><div class="form-grid" style="margin-top:10px;">' +
+      '<div class="form-field full"><div class="field-label">Contraindications</div><div class="field-value">' + (esc(d.contraindications) || '-') + '</div></div>' +
+      '<div class="form-field full"><div class="field-label">Drug Interactions</div><div class="field-value">' + renderInteractions(d.interactions) + '</div></div>' +
+    '</div></div>' +
+    '<div class="form-section"><h3>\u26A0\uFE0F Side Effects</h3><div>' + (seHtml || '<span style="font-size:13px;color:#95a5a6;">None listed</span>') + '</div></div>' +
+    '<div class="form-section"><h3>\uD83D\uDCE6 Regulatory & Storage</h3><div class="form-grid">' +
+      '<div class="form-field"><div class="field-label">Manufacturer License</div><div class="field-value">' + (esc(d.license) || '-') + '</div></div>' +
+      '<div class="form-field full"><div class="field-label">Storage Conditions</div><div class="field-value">' + (esc(d.storage) || '-') + '</div></div>' +
+    '</div></div>' +
+    subsHtml + jaBlock + '</div>';
+}
+
+function renderInteractions(val) {
+  if (!val) return '-';
+  var str = String(val).trim();
+  if (str.charAt(0) !== '{') return esc(str);
+  try {
+    var data = JSON.parse(str);
+    if (!data.drug || !data.drug.length) return '<i style="color:#95a5a6;">None listed</i>';
+    var html = '<div style="border:1px solid #ffecec;border-radius:8px;overflow:hidden;font-size:12px;"><table style="width:100%;border-collapse:collapse;">';
+    html += '<tr style="background:#fff0f0;"><th style="text-align:left;padding:6px;color:#d32f2f;">Drug</th><th style="text-align:left;padding:6px;color:#d32f2f;">Common Brands</th><th style="text-align:left;padding:6px;color:#d32f2f;">Effect</th></tr>';
+    for (var i = 0; i < data.drug.length; i++) {
+      var drug = data.drug[i] || '';
+      var brand = data.brand[i] || '';
+      var effect = data.effect[i] || 'Unknown';
+      var color = effect.indexOf('SERIOUS') > -1 || effect.indexOf('LIFE') > -1 ? '#d32f2f' : '#333';
+      html += '<tr style="border-bottom:1px solid #fff5f5;"><td style="padding:6px;background:white;"><b>' + esc(drug) + '</b></td><td style="padding:6px;background:white;font-size:11px;color:#666;">' + esc(brand) + '</td><td style="padding:6px;color:' + color + ';font-weight:bold;background:white;">' + esc(effect) + '</td></tr>';
+    }
+    html += '</table></div>';
+    return html;
+  } catch(e) {
+    return esc(str);
+  }
+}
+
+function cleanImageUrl(url) {
+  if (!url) return url;
+  var s = String(url);
+  if (s.indexOf('onemg.gumlet.io') > -1) s = s.replace(/l_watermark_[^/]+\//, '');
+  return s.replace(/&wmk=[^&]*/g, '');
+}
+
+function esc(s) {
+  if (!s) return '';
+  s = String(s);
+  var el = document.createElement('span');
+  el.textContent = s;
+  return el.innerHTML;
+}
+
+initConnection();
+</script>
+</body>
+</html>
